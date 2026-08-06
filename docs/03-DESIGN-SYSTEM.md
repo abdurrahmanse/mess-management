@@ -12,6 +12,9 @@ This document is the absolute source of truth for all UI/UX implementations in t
 - **Information Hierarchy:** Data first. Navigation and chrome must recede to the background.
 - **Simplicity Rules:** Avoid excessive borders and nested boxes. Use whitespace and typography to separate content.
 - **Consistency Rules:** Same actions use the same colors, placements, and verbiage globally.
+- **Component Reusability (DRY):** UI Code must never be duplicated. If a component (e.g., card, button, form input) is used in multiple places, it must be extracted into a common, shared UI component.
+- **Granularity & Quality:** UI components must be broken down into small, highly cohesive, single-responsibility units. Avoid creating massive "god components".
+- **Professional Iconography:** Always use multiple professional icons (`lucide-react`) throughout the application to enhance visual cues and modern aesthetics.
 - **Trust & Financial UI:** Amounts align right, positive is green, negative is red. No ambiguity.
 
 ---
@@ -187,3 +190,20 @@ This document is the absolute source of truth for all UI/UX implementations in t
 - **Components:** `[Entity][Type]` (e.g., `MemberTable`, `DepositForm`).
 - **CSS Variables:** `--[category]-[name]` (e.g., `--color-primary`, `--spacing-md`).
 - **Variants:** lowercase (e.g., `variant="outline"`, `size="sm"`).
+
+---
+
+## 21. Authentication UI/UX Requirements
+- **Visual Priority:** Authentication must provide the best visual experience in the application.
+- **Layout:** Split-screen responsive layout with a branded illustration or hero section alongside a professional authentication card.
+- **Design Elements:** Glassmorphism or modern card design, fully theme-aware (Light/Dark).
+- **Interactions:** Animated transitions, password visibility toggles, inline validation, loading skeletons, and clear Success/Error feedback.
+- **Security UX:** Password strength indicator, Resend OTP countdown.
+- **Accessibility:** Fully responsive, mobile-first, and WCAG compliant.
+- **Future-Ready:** Social login placeholders included but disabled by default.
+
+---
+
+## 22. Role-Based Access Control (RBAC) UI/UX Requirements
+- **Permission Strategy:** The client UI must proactively hide unauthorized features. Do not show buttons or links that the user cannot interact with due to their role. Client-side checks are strictly for UX (Server-side authorization is mandatory).
+- **Dashboard Protection:** If authentication fails or session is invalid, the user must immediately be redirected to Login. The dashboard must never flash or render unauthorized content.

@@ -249,3 +249,26 @@ Every AI Coding Agent must follow the approved modern architecture by default fo
 * Use **Server Actions** for secure server-side mutations whenever appropriate; otherwise use authenticated Route Handlers with TanStack Query.
 * Reuse shared hooks, utilities, types, schemas, constants, and UI components. Never duplicate logic across features.
 * Every implementation must be optimized for scalability, maintainability, performance, and developer experience (DX), while following the Architecture Strategy, Coding Standards, and Project Structure.
+
+---
+
+## 23. Authentication-First Application Flow
+- **Authentication Priority:** The AI must acknowledge that Authentication is the highest priority feature. No business feature may be implemented until the complete Authentication module has been finished, verified, tested, and approved.
+- **Application Entry Flow:** The application must always start with authentication (Login -> Registration -> OTP -> Dashboard). Users must never access the dashboard before authentication.
+- **Dashboard Protection:** Without a valid authenticated session, the dashboard must never render, protected API endpoints must never execute, protected Server Actions must never execute, and protected Server Components must never load protected data. Unauthenticated users must always be redirected to Login.
+- **AI Stoppage Rule:** The AI Coding Agent must never generate Dashboard pages before the Authentication module is fully completed. If authentication is incomplete when a business feature is requested, the AI must stop implementation and report that the prerequisite Authentication phase has not yet been completed.
+
+---
+
+## 24. Role-Based Access Control (RBAC) AI Rules
+- Every future implementation must automatically: Verify authentication, Verify authorization, Verify required role, Verify required permission, Hide unauthorized UI, Block unauthorized APIs, Block unauthorized Server Actions, and Follow the RBAC specification without exception.
+- The AI must never implement a feature that bypasses authentication or role validation.
+- RBAC is a mandatory architectural rule for the entire application.
+
+---
+
+## 25. Code Granularity, Component Reuse, and UI Aesthetics
+- **Professional Icons:** Always use multiple professional icons throughout the website to enhance the UI/UX.
+- **Component Reuse (DRY):** Never duplicate UI code. Re-use components across features. If a component (e.g., button, card, form element) is needed in multiple places, extract it into a common shared component.
+- **Micro-Components:** Separate and divide code into small, highly cohesive, single-responsibility components. Do not create massive, complex "god components" or large unreadable files.
+- **Code Quality Focus:** Maintain high code quality by keeping the architecture modular, simple, and strictly separated, avoiding overly complex abstractions across the entire project.

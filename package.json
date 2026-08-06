@@ -25,6 +25,7 @@
   ],
   "packageManager": "npm@11.17.0",
   "dependencies": {
-    "@prisma/client": "^5.22.0"
+    "@prisma/client": "^5.22.0",
+    "better-auth": "^1.6.26"
   }
 }

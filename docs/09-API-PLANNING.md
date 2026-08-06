@@ -209,6 +209,8 @@ Interfacing securely with Cloudinary.
 ---
 
 ## 19. Security Standards
+- **Authentication-First Rule:** No business APIs may be designed or implemented before the Authentication APIs are complete.
+- **API Protection:** Every API Route Handler mapped to a business feature must verify authentication before execution. Unauthenticated requests to protected endpoints must return `401 Unauthorized`.
 - **Authorization:** Middleware and Handler-level checks against `session.user.role`.
 - **Rate Limiting:** Protect `/api/auth/*` and `/api/uploads/*`.
 - **CORS:** Restrict API access strictly to the Next.js frontend origin.
@@ -258,3 +260,13 @@ Before considering an endpoint complete, verify:
 - [ ] Response matches the standard envelope structure.
 - [ ] Error responses correctly map to HTTP status codes.
 - [ ] Matches Database Planning constraints.
+
+---
+
+## 25. Role-Based Access Control (RBAC) & Permission Policy
+- **User Registration Policy:** Only Members can self-register. Registration requires Full Name, Email Address, Password, Confirm Password, and Email OTP Verification. A newly registered account must have the default role: MEMBER. No user may choose ADMIN or MANAGER during registration. Roles are assigned internally by the system.
+- **Administrator Policy:** The system contains exactly one default Administrator account created during initial database seed. The Administrator has complete system access (View all data, Create users, Activate/deactivate users, Promote Member to Manager, Remove Manager role, Manage all Members, View all financial data, Manage system settings, View audit logs, Manage authentication/application config). The Administrator cannot bypass authentication.
+- **Manager Policy:** Managers are never self-created, they are appointed only by the Administrator. A Manager is a Member whose role has been promoted. Managers may: Access Dashboard, Manage Members, Add shopping/deposits/expenses, Update financial records, Manage meals, Generate reports, Close monthly calculations, Upload receipts, Edit existing business data. Managers MUST NOT: Delete Members/Managers, Create Administrators, Promote other Managers, Change user roles, Access system configuration, Manage authentication settings, View security logs, Delete critical financial history.
+- **Member Policy:** Members are standard users. They must register before accessing the system. Members can: Log in, View their own profile/deposits/meals/balance/monthly reports, Update limited profile information. Members CANNOT: Manage other users, View other members' financial information, Create expenses/deposits for others, Change roles, Access administration/management pages, Modify system settings.
+- **Permission Strategy:** The system must use Role-Based Access Control (RBAC). Permissions must be checked on both Server and Client. Client UI hides unauthorized features for UX, but server-side authorization is mandatory before executing business logic.
+- **Security Rules:** Authentication is required before authorization. Authorization is required before business logic. Business logic is required before database access. No API endpoint or Server Action may execute without proper validation. No sensitive data may be returned without authorization.

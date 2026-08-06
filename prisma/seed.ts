@@ -35,11 +35,12 @@ async function main() {
 
   // 2. Create Users & Members
   const userAdmin = await prisma.user.upsert({
-    where: { email: 'admin@mess.com' },
+    where: { email: 'abdurrahman.learn@gmail.com' },
     update: {},
     create: {
-      email: 'admin@mess.com',
+      email: 'abdurrahman.learn@gmail.com',
       name: 'Admin User',
+      emailVerified: true,
       role: Role.ADMIN,
       status: UserStatus.ACTIVE,
       member: {
@@ -54,11 +55,12 @@ async function main() {
   })
 
   const userMember = await prisma.user.upsert({
-    where: { email: 'member@mess.com' },
+    where: { email: 'learn.abdurrahman@gmail.com' },
     update: {},
     create: {
-      email: 'member@mess.com',
+      email: 'learn.abdurrahman@gmail.com',
       name: 'Regular Member',
+      emailVerified: true,
       role: Role.MEMBER,
       status: UserStatus.ACTIVE,
       member: {

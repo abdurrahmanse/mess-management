@@ -89,9 +89,12 @@ No folder should have overlapping responsibilities.
 ---
 
 ## 8. Authentication & Authorization
+- **Authentication-First Rule:** Authentication is the highest priority feature. No business feature may be implemented until the complete Authentication module has been finished, verified, tested, and approved.
+- **Application Entry Flow:** The application must always start with authentication. Users must never access the dashboard before authentication.
+- **Dashboard Protection:** All dashboard pages are strictly private. Without a valid authenticated session, the dashboard must never render, protected API endpoints/Server Actions must never execute, and unauthenticated users must be redirected to Login.
 - **Better Auth:** The exclusive auth provider.
 - **Session Strategy:** Cookie-based, HTTP-only, secure sessions.
-- **Protected Routes:** Enforced globally at the edge via `middleware.ts` for all `/dashboard/*` routes.
+- **Protected Routes:** Enforced globally at the edge via `proxy.ts` (or middleware) for all `/dashboard/*` routes.
 - **Role-Based Access (RBAC):** `ADMIN`, `MANAGER`, `MEMBER`. Checked at the API level and UI level.
 - **OTP & Email:** Handled via Resend. Tokens expire in 15 minutes.
 - **Cookie Strategy:** SameSite=Lax, Secure in production.
@@ -196,3 +199,13 @@ No folder should have overlapping responsibilities.
 - **Never duplicate business logic:** Use existing utilities and hooks.
 - **Never move files outside approved folders:** The structure defined here is rigid.
 - **Strict Adherence:** AI Coding Agents must read this document before generating any new implementation. When generating code, the output must comply 100% with the layered architecture pattern.
+
+---
+
+## 21. Role-Based Access Control (RBAC) & Permission Policy
+- **User Registration Policy:** Only Members can self-register. Registration requires Full Name, Email Address, Password, Confirm Password, and Email OTP Verification. A newly registered account must have the default role: MEMBER. No user may choose ADMIN or MANAGER during registration. Roles are assigned internally by the system.
+- **Administrator Policy:** The system contains exactly one default Administrator account created during initial database seed. The Administrator has complete system access (View all data, Create users, Activate/deactivate users, Promote Member to Manager, Remove Manager role, Manage all Members, View all financial data, Manage system settings, View audit logs, Manage authentication/application config). The Administrator cannot bypass authentication.
+- **Manager Policy:** Managers are never self-created, they are appointed only by the Administrator. A Manager is a Member whose role has been promoted. Managers may: Access Dashboard, Manage Members, Add shopping/deposits/expenses, Update financial records, Manage meals, Generate reports, Close monthly calculations, Upload receipts, Edit existing business data. Managers MUST NOT: Delete Members/Managers, Create Administrators, Promote other Managers, Change user roles, Access system configuration, Manage authentication settings, View security logs, Delete critical financial history.
+- **Member Policy:** Members are standard users. They must register before accessing the system. Members can: Log in, View their own profile/deposits/meals/balance/monthly reports, Update limited profile information. Members CANNOT: Manage other users, View other members' financial information, Create expenses/deposits for others, Change roles, Access administration/management pages, Modify system settings.
+- **Permission Strategy:** The system must use Role-Based Access Control (RBAC). Permissions must be checked on both Server and Client. Client UI hides unauthorized features for UX, but server-side authorization is mandatory before executing business logic.
+- **Security Rules:** Authentication is required before authorization. Authorization is required before business logic. Business logic is required before database access. No API endpoint or Server Action may execute without proper validation. No sensitive data may be returned without authorization.

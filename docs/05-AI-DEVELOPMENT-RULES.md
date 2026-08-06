@@ -233,3 +233,19 @@ The AI Coding Agent must **automatically** perform the following after completin
    - Remaining issues (if any)
    - Confirmation that the task satisfies the Definition of Done (DoD).
 6. **Strict Gatekeeping:** Never proceed to the next roadmap task until the current task passes **every** validation check and the final verification report has been generated.
+
+---
+
+## 22. Mandatory Modern Development Stack Policy
+Every AI Coding Agent must follow the approved modern architecture by default for all current and future features. Do **not** fall back to basic implementations unless explicitly instructed.
+
+* Use **TanStack Query** for all server state, data fetching, caching, pagination, optimistic updates, background refetching, mutations, and cache invalidation. Never fetch server data directly inside components using `fetch`, `useEffect`, or `useState`.
+* Use **Zustand** only for global client state (theme, sidebar, notifications, filters, user preferences, temporary UI state). Never store server data in Zustand.
+* Implement a centralized **API Client Layer** (`lib/api-client`) for all HTTP communication. No page, component, or feature may call APIs directly.
+* All API requests must be encapsulated inside reusable **Services**, **Queries**, and **Mutations** following the Feature-Based Architecture.
+* Use **React Hook Form + Zod** for every form. Never use uncontrolled manual form validation.
+* Keep business logic inside Services or Server Actions, not inside React components.
+* Prefer **React Server Components** for read-only pages and use Client Components only where interactivity is required.
+* Use **Server Actions** for secure server-side mutations whenever appropriate; otherwise use authenticated Route Handlers with TanStack Query.
+* Reuse shared hooks, utilities, types, schemas, constants, and UI components. Never duplicate logic across features.
+* Every implementation must be optimized for scalability, maintainability, performance, and developer experience (DX), while following the Architecture Strategy, Coding Standards, and Project Structure.

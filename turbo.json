@@ -12,6 +12,14 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "outputs": ["coverage/**"]
+    },
+    "e2e": {
+      "dependsOn": ["^e2e"],
+      "outputs": ["playwright-report/**", "test-results/**"]
     }
   }
 }

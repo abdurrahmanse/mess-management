@@ -93,8 +93,8 @@ No folder should have overlapping responsibilities.
 - **Application Entry Flow:** The application must always start with authentication. Users must never access the dashboard before authentication.
 - **Dashboard Protection:** All dashboard pages are strictly private. Without a valid authenticated session, the dashboard must never render, protected API endpoints/Server Actions must never execute, and unauthenticated users must be redirected to Login.
 - **Better Auth:** The exclusive auth provider.
-- **Session Strategy:** Cookie-based, HTTP-only, secure sessions.
-- **Protected Routes:** Enforced globally at the edge via `proxy.ts` (or middleware) for all `/dashboard/*` routes.
+- **Session Strategy:** Cookie-based, HTTP-only, secure sessions via Better Auth.
+- **Protected Routes:** Enforced globally at the edge via `apps/web/proxy.ts`. We DO NOT use Next.js `middleware.ts` due to circular dependency/deadlock issues with `fetch` during server startup.
 - **Role-Based Access (RBAC):** `ADMIN`, `MANAGER`, `MEMBER`. Checked at the API level and UI level.
 - **OTP & Email:** Handled via Resend. Tokens expire in 15 minutes.
 - **Cookie Strategy:** SameSite=Lax, Secure in production.
@@ -123,10 +123,9 @@ No folder should have overlapping responsibilities.
 
 ## 11. File Storage Strategy
 - **Cloudinary:** Exclusive provider for binary assets. No local storage.
-- **Signed Upload:** API provides secure signature `api/upload/signature`. Client uploads directly.
-- **Metadata:** PostgreSQL stores `secureUrl`, `publicId`, `mimeType`, and `size`.
-- **Deletion:** Cloudinary Asset deletion must be triggered via API when DB record is removed.
-- **Image Optimization:** Requested via Cloudinary URL params (`w_500,q_auto,f_auto`).
+- **Upload Widget:** Use `next-cloudinary`'s `CldUploadWidget` for unsigned client-side uploads directly to Cloudinary.
+- **Metadata:** PostgreSQL stores the returned `secure_url`.
+- **Image Optimization:** Must use `next/image` combined with `res.cloudinary.com` remote patterns in `next.config.mjs`.
 
 ---
 

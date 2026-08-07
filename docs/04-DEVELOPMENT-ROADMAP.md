@@ -109,7 +109,7 @@ Every Prompt ID in this roadmap encapsulates the following contract. To keep the
 
 ## 6. The Enterprise Roadmap
 
-### Phase 1 — Authentication Master Roadmap
+### Phase 1 — Authentication & Authorization [COMPLETED]
 *Authentication must be fully completed before any business feature is implemented.*
 
 #### Prompt ID: AUTH-001 (Setup Better Auth)
@@ -295,6 +295,26 @@ Every Prompt ID in this roadmap encapsulates the following contract. To keep the
 #### Prompt ID: OPS-002 (Backup & Export)
 - **Objective**: API route to generate and download a CSV/JSON dump of the current month.
 - **Allowed Files**: `app/api/export/route.ts`, `features/settings/components/export-button.tsx`.
+
+---
+
+### Phase 13 — Modern Enhancements
+
+#### Prompt ID: MODERN-001 (AI Mess Assistant)
+- **Objective**: Implement a Vercel AI SDK chatbot to answer financial and meal questions for members.
+- **Allowed Files**: `app/api/chat/route.ts`, `features/ai/components/chat-widget.tsx`.
+
+#### Prompt ID: MODERN-002 (Offline Mode & PWA Enhancements)
+- **Objective**: Enable offline bazar input using TanStack Query optimistic updates, syncing upon reconnection.
+- **Allowed Files**: `features/shopping/actions.ts`, `hooks/use-offline-sync.ts`.
+
+#### Prompt ID: MODERN-003 (Automated Notifications)
+- **Objective**: Send Web Push notifications or automated Resend emails for Month Closings and Low Balances.
+- **Allowed Files**: `features/notifications/actions.ts`, `lib/push.ts`.
+
+#### Prompt ID: MODERN-004 (Receipt OCR)
+- **Objective**: Automatically parse Cloudinary-uploaded bazar receipts to extract total amounts.
+- **Allowed Files**: `features/shopping/components/receipt-scanner.tsx`, `app/api/ocr/route.ts`.
 
 ---
 

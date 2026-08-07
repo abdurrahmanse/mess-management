@@ -216,3 +216,17 @@ The project is considered successful when it is:
 - **Member Policy:** Members are standard users. They must register before accessing the system. Members can: Log in, View their own profile/deposits/meals/balance/monthly reports, Update limited profile information. Members CANNOT: Manage other users, View other members' financial information, Create expenses/deposits for others, Change roles, Access administration/management pages, Modify system settings.
 - **Permission Strategy:** The system must use Role-Based Access Control (RBAC). Permissions must be checked on both Server and Client. Client UI hides unauthorized features for UX, but server-side authorization is mandatory before executing business logic.
 - **Security Rules:** Authentication is required before authorization. Authorization is required before business logic. Business logic is required before database access. No API endpoint or Server Action may execute without proper validation. No sensitive data may be returned without authorization.
+
+---
+
+## 20. Modern Enhancements & AI Integration Policy
+- **AI Tooling:** Use Vercel AI SDK for LLM integrations (Chatbots, OCR processing).
+- **Data Privacy (AI):** AI systems must only access data permitted by the active user's Role. Prompts must be injected with context strictly limited to the user's personal scope unless they are an Admin.
+- **OCR Validation:** Optical Character Recognition outputs (e.g. from receipt scanning) must ALWAYS require human confirmation before saving to the database. AI is an assistant, not a final decider.
+
+---
+
+## 21. Progressive Web App (PWA) & Offline Policy
+- **Offline First UI:** Use TanStack Query to implement Optimistic UI updates. A user should be able to click "Save" while offline, and the UI should reflect the change instantly.
+- **Syncing:** Mutations made offline must be queued and automatically synced to the server upon network reconnection.
+- **Service Workers:** Leverage `@ducanh2912/next-pwa` for robust caching of static assets and critical API reads to ensure the app is usable without internet.

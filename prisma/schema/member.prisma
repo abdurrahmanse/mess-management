@@ -1,0 +1,28 @@
+model Member {
+  id         String    @id @default(cuid())
+  userId     String?   @unique @map("user_id")
+  firstName  String    @map("first_name") @db.VarChar(100)
+  lastName   String    @map("last_name") @db.VarChar(100)
+  phone      String?   @db.VarChar(20)
+  roomNumber String?   @map("room_number") @db.VarChar(20)
+  joinDate   DateTime  @default(now()) @map("join_date")
+  leaveDate  DateTime? @map("leave_date")
+
+  seatRent       Float @default(0) @map("seat_rent")
+  utilityBill    Float @default(0) @map("utility_bill")
+  otherBill      Float @default(0) @map("other_bill")
+  customMealRate Float? @map("custom_meal_rate")
+
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  deposits       Deposit[]
+  shoppings      Shopping[]
+  mealRecords    MealRecord[]
+  memberBalances MemberBalance[]
+
+  @@index([userId])
+  @@map("members")
+}

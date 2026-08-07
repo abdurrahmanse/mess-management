@@ -1,0 +1,45 @@
+model ActivityLog {
+  id         String       @id @default(cuid())
+  userId     String?      @map("user_id")
+  action     ActivityType
+  entityType String       @map("entity_type") @db.VarChar(100)
+  entityId   String       @map("entity_id")
+  metadata   Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String           @map("user_id")
+  type    NotificationType
+  title   String           @db.VarChar(255)
+  message String           @db.Text
+  isRead  Boolean          @default(false) @map("is_read")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model Settings {
+  id              String  @id @default(cuid())
+  messName        String  @default("My Mess") @map("mess_name") @db.VarChar(100)
+  currency        String  @default("BDT") @db.VarChar(10)
+  timezone        String  @default("Asia/Dhaka") @db.VarChar(50)
+  defaultMealRate Decimal @default(0.0) @map("default_meal_rate") @db.Decimal(10, 2)
+
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedById String?  @map("updated_by_id")
+
+  @@map("settings")
+}

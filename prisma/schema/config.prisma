@@ -1,0 +1,93 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum TransactionType {
+  DEPOSIT
+  EXPENSE
+  TRANSFER
+  REFUND
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CREDIT
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum UploadType {
+  AVATAR
+  RECEIPT
+  DOCUMENT
+}
+
+enum ExpenseType {
+  FIXED
+  VARIABLE
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  GUEST
+}
+
+enum NotificationType {
+  SYSTEM
+  FINANCIAL
+  REMINDER
+  ALERT
+}
+
+enum ActivityType {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  EXPORT
+}
+
+enum MonthStatus {
+  OPEN
+  FROZEN
+  CLOSED
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum DocumentType {
+  INVOICE
+  CONTRACT
+  GUIDELINE
+}

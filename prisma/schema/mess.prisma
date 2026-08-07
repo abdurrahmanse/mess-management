@@ -1,0 +1,58 @@
+model Shopping {
+  id          String   @id @default(cuid())
+  date        DateTime
+  totalAmount Decimal  @map("total_amount") @db.Decimal(10, 2)
+  shopperId   String   @map("shopper_id")
+
+  shopper Member         @relation(fields: [shopperId], references: [id], onDelete: Restrict)
+  items   ShoppingItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@index([shopperId])
+  @@map("shopping")
+}
+
+model ShoppingItem {
+  id         String  @id @default(cuid())
+  shoppingId String  @map("shopping_id")
+  name       String  @db.VarChar(255)
+  quantity   Decimal @db.Decimal(10, 2)
+  unitId     String? @map("unit_id")
+  price      Decimal @db.Decimal(10, 2)
+
+  shopping Shopping @relation(fields: [shoppingId], references: [id], onDelete: Cascade)
+  unit     Unit?    @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([shoppingId])
+  @@map("shopping_items")
+}
+
+model Unit {
+  id           String @id @default(cuid())
+  name         String @unique @db.VarChar(50)
+  abbreviation String @db.VarChar(20)
+
+  shoppingItems ShoppingItem[]
+
+  @@map("units")
+}
+
+model MealRecord {
+  id       String   @id @default(cuid())
+  memberId String   @map("member_id")
+  date     DateTime
+  type     MealType
+  quantity Decimal  @db.Decimal(4, 2)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([memberId, date, type])
+  @@index([memberId, date])
+  @@map("meal_records")
+}

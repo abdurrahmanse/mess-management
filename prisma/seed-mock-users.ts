@@ -4,11 +4,19 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding mock users...');
+  
+  // We need to hash passwords for better-auth so these users can actually log in.
+  // We use require here to avoid import issues if running as a plain node script without ts-node's full path resolution
+  const { hashPassword } = require("better-auth/crypto");
+  
+  const defaultPasswordHash = await hashPassword("password123");
+  const adminPasswordHash = await hashPassword("AR.1$lpd");
 
   // 1. Create 2 Admins
   for (let i = 1; i <= 2; i++) {
-    const email = `admin${i}@example.com`;
-    
+    const email = i === 1 ? "abdurrahmansoftw@gmail.com" : `admin${i}@example.com`;
+    const passwordHash = i === 1 ? adminPasswordHash : defaultPasswordHash;
+
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       user = await prisma.user.create({
@@ -20,7 +28,17 @@ async function main() {
           status: UserStatus.ACTIVE,
         },
       });
-      
+
+      // Create better-auth Account for login
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountId: user.email,
+          providerId: "credential",
+          password: passwordHash,
+        }
+      });
+
       await prisma.member.create({
         data: {
           userId: user.id,
@@ -42,7 +60,7 @@ async function main() {
   // 2. Create 2 Managers
   for (let i = 1; i <= 2; i++) {
     const email = `manager${i}@example.com`;
-    
+
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       user = await prisma.user.create({
@@ -55,6 +73,16 @@ async function main() {
         },
       });
       
+      // Create better-auth Account for login
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountId: user.email,
+          providerId: "credential",
+          password: defaultPasswordHash,
+        }
+      });
+
       await prisma.member.create({
         data: {
           userId: user.id,
@@ -76,7 +104,7 @@ async function main() {
   // 3. Create 20 Regular Members
   for (let i = 1; i <= 20; i++) {
     const email = `member${i}@example.com`;
-    
+
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       user = await prisma.user.create({
@@ -89,6 +117,16 @@ async function main() {
         },
       });
       
+      // Create better-auth Account for login
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountId: user.email,
+          providerId: "credential",
+          password: defaultPasswordHash,
+        }
+      });
+
       await prisma.member.create({
         data: {
           userId: user.id,

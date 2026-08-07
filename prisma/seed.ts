@@ -1,4 +1,4 @@
-import { PrismaClient, Role, UserStatus, TransactionType, PaymentMethod, ExpenseStatus } from '@prisma/client'
+import { PrismaClient, Role, UserStatus, TransactionType, PaymentMethod, ExpenseStatus, MealType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -43,14 +43,6 @@ async function main() {
       emailVerified: true,
       role: Role.ADMIN,
       status: UserStatus.ACTIVE,
-      member: {
-        create: {
-          firstName: 'Admin',
-          lastName: 'User',
-          phone: '01700000000',
-          roomNumber: 'A1',
-        },
-      },
     },
   })
 
@@ -63,22 +55,35 @@ async function main() {
       emailVerified: true,
       role: Role.MEMBER,
       status: UserStatus.ACTIVE,
-      member: {
-        create: {
-          firstName: 'Regular',
-          lastName: 'Member',
-          phone: '01800000000',
-          roomNumber: 'B1',
-        },
-      },
     },
   })
 
   // We need the member IDs to create transactions
-  const memberAdmin = await prisma.member.findUnique({ where: { userId: userAdmin.id } })
-  const memberReg = await prisma.member.findUnique({ where: { userId: userMember.id } })
+  let memberAdmin = await prisma.member.findUnique({ where: { userId: userAdmin.id } })
+  if (!memberAdmin) {
+    memberAdmin = await prisma.member.create({
+      data: {
+        userId: userAdmin.id,
+        firstName: 'Admin',
+        lastName: 'User',
+        phone: '01700000000',
+        roomNumber: 'A1',
+      },
+    })
+  }
 
-  if (!memberAdmin || !memberReg) throw new Error("Members not found after creation.")
+  let memberReg = await prisma.member.findUnique({ where: { userId: userMember.id } })
+  if (!memberReg) {
+    memberReg = await prisma.member.create({
+      data: {
+        userId: userMember.id,
+        firstName: 'Regular',
+        lastName: 'Member',
+        phone: '01800000000',
+        roomNumber: 'B1',
+      },
+    })
+  }
 
   // 3. Create Deposits
   // Admin deposit
@@ -134,6 +139,83 @@ async function main() {
   })
 
   console.log('Seeding finished successfully.')
+
+  // 5. Create Units
+  const unitKg = await prisma.unit.upsert({
+    where: { name: 'Kilogram' },
+    update: {},
+    create: { name: 'Kilogram', abbreviation: 'kg' }
+  })
+  const unitL = await prisma.unit.upsert({
+    where: { name: 'Liter' },
+    update: {},
+    create: { name: 'Liter', abbreviation: 'L' }
+  })
+  const unitPcs = await prisma.unit.upsert({
+    where: { name: 'Pieces' },
+    update: {},
+    create: { name: 'Pieces', abbreviation: 'pcs' }
+  })
+
+  // 6. Create Shopping & Shopping Items
+  await prisma.shopping.create({
+    data: {
+      date: new Date(),
+      totalAmount: 1500,
+      shopperId: memberAdmin.id,
+      items: {
+        create: [
+          { name: 'Rice', quantity: 5, unitId: unitKg.id, price: 350 },
+          { name: 'Chicken', quantity: 2, unitId: unitKg.id, price: 400 },
+          { name: 'Oil', quantity: 3, unitId: unitL.id, price: 500 },
+          { name: 'Onion', quantity: 2, unitId: unitKg.id, price: 250 },
+        ],
+      },
+    },
+  })
+
+  // 7. Create Meal Records
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  const mealData = [
+    { memberId: memberReg.id, date: yesterday, type: MealType.LUNCH, quantity: 1 },
+    { memberId: memberReg.id, date: yesterday, type: MealType.DINNER, quantity: 1 },
+    { memberId: memberAdmin.id, date: yesterday, type: MealType.LUNCH, quantity: 1 },
+    { memberId: memberAdmin.id, date: yesterday, type: MealType.DINNER, quantity: 2 },
+    
+    { memberId: memberReg.id, date: today, type: MealType.LUNCH, quantity: 1 },
+    { memberId: memberReg.id, date: today, type: MealType.DINNER, quantity: 1 },
+    { memberId: memberAdmin.id, date: today, type: MealType.DINNER, quantity: 1 },
+  ]
+
+  for (const meal of mealData) {
+    await prisma.mealRecord.upsert({
+      where: {
+        memberId_date_type: {
+          memberId: meal.memberId,
+          date: meal.date,
+          type: meal.type,
+        }
+      },
+      update: {},
+      create: meal,
+    })
+  }
+
+  // 8. Create Settings
+  const existingSettings = await prisma.settings.findFirst()
+  if (!existingSettings) {
+    await prisma.settings.create({
+      data: {
+        messName: 'AI Mess Alpha',
+        currency: 'BDT',
+        timezone: 'Asia/Dhaka',
+        defaultMealRate: 60.0,
+      }
+    })
+  }
 }
 
 main()

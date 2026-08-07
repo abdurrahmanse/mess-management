@@ -50,6 +50,51 @@ enum UploadType {
   DOCUMENT
 }
 
+enum ExpenseType {
+  FIXED
+  VARIABLE
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  GUEST
+}
+
+enum NotificationType {
+  SYSTEM
+  FINANCIAL
+  REMINDER
+  ALERT
+}
+
+enum ActivityType {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  EXPORT
+}
+
+enum MonthStatus {
+  OPEN
+  FROZEN
+  CLOSED
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum DocumentType {
+  INVOICE
+  CONTRACT
+  GUIDELINE
+}
+
 // =========================================================================
 // AUTHENTICATION MODELS (Better Auth)
 // =========================================================================
@@ -66,9 +111,11 @@ model User {
   role   Role       @default(MEMBER)
   status UserStatus @default(ACTIVE)
 
-  sessions Session[]
-  accounts Account[]
-  member   Member?
+  sessions      Session[]
+  accounts      Account[]
+  member        Member?
+  activityLogs  ActivityLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -137,8 +184,11 @@ model Member {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  deposits Deposit[]
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  deposits       Deposit[]
+  shoppings      Shopping[]
+  mealRecords    MealRecord[]
+  memberBalances MemberBalance[]
 
   @@index([userId])
   @@map("members")
@@ -160,6 +210,7 @@ model Transaction {
 
   deposit Deposit?
   expense Expense?
+  tags    TransactionTag[]
 
   @@index([date])
   @@index([type])
@@ -225,4 +276,171 @@ model CloudinaryAsset {
 
   @@index([uploadedById])
   @@map("cloudinary_assets")
+}
+
+// =========================================================================
+// SUPPORTING & EXTENDED MODELS
+// =========================================================================
+
+model Shopping {
+  id          String   @id @default(cuid())
+  date        DateTime
+  totalAmount Decimal  @map("total_amount") @db.Decimal(10, 2)
+  shopperId   String   @map("shopper_id")
+
+  shopper Member         @relation(fields: [shopperId], references: [id], onDelete: Restrict)
+  items   ShoppingItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@index([shopperId])
+  @@map("shopping")
+}
+
+model ShoppingItem {
+  id         String  @id @default(cuid())
+  shoppingId String  @map("shopping_id")
+  name       String  @db.VarChar(255)
+  quantity   Decimal @db.Decimal(10, 2)
+  unitId     String? @map("unit_id")
+  price      Decimal @db.Decimal(10, 2)
+
+  shopping Shopping @relation(fields: [shoppingId], references: [id], onDelete: Cascade)
+  unit     Unit?    @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([shoppingId])
+  @@map("shopping_items")
+}
+
+model Unit {
+  id           String @id @default(cuid())
+  name         String @unique @db.VarChar(50)
+  abbreviation String @db.VarChar(20)
+
+  shoppingItems ShoppingItem[]
+
+  @@map("units")
+}
+
+model MealRecord {
+  id       String   @id @default(cuid())
+  memberId String   @map("member_id")
+  date     DateTime
+  type     MealType
+  quantity Decimal  @db.Decimal(4, 2)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([memberId, date, type])
+  @@index([memberId, date])
+  @@map("meal_records")
+}
+
+model MonthClosing {
+  id            String      @id @default(cuid())
+  monthYear     String      @unique @map("month_year") @db.VarChar(7)
+  status        MonthStatus @default(OPEN)
+  totalExpenses Decimal     @map("total_expenses") @db.Decimal(10, 2)
+  totalMeals    Decimal     @map("total_meals") @db.Decimal(10, 2)
+  mealRate      Decimal     @map("meal_rate") @db.Decimal(10, 2)
+
+  closedAt   DateTime? @map("closed_at")
+  closedById String?   @map("closed_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  balances MemberBalance[]
+
+  @@index([status])
+  @@map("month_closings")
+}
+
+model MemberBalance {
+  id             String  @id @default(cuid())
+  monthClosingId String  @map("month_closing_id")
+  memberId       String  @map("member_id")
+  totalDeposits  Decimal @map("total_deposits") @db.Decimal(10, 2)
+  totalMealCost  Decimal @map("total_meal_cost") @db.Decimal(10, 2)
+  carriedForward Decimal @map("carried_forward") @db.Decimal(10, 2)
+  finalBalance   Decimal @map("final_balance") @db.Decimal(10, 2)
+
+  monthClosing MonthClosing @relation(fields: [monthClosingId], references: [id], onDelete: Restrict)
+  member       Member       @relation(fields: [memberId], references: [id], onDelete: Restrict)
+
+  @@index([monthClosingId])
+  @@index([memberId])
+  @@map("member_balances")
+}
+
+model ActivityLog {
+  id         String       @id @default(cuid())
+  userId     String?      @map("user_id")
+  action     ActivityType
+  entityType String       @map("entity_type") @db.VarChar(100)
+  entityId   String       @map("entity_id")
+  metadata   Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String           @map("user_id")
+  type    NotificationType
+  title   String           @db.VarChar(255)
+  message String           @db.Text
+  isRead  Boolean          @default(false) @map("is_read")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model Settings {
+  id              String  @id @default(cuid())
+  messName        String  @default("My Mess") @map("mess_name") @db.VarChar(100)
+  currency        String  @default("BDT") @db.VarChar(10)
+  timezone        String  @default("Asia/Dhaka") @db.VarChar(50)
+  defaultMealRate Decimal @default(0.0) @map("default_meal_rate") @db.Decimal(10, 2)
+
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedById String?  @map("updated_by_id")
+
+  @@map("settings")
+}
+
+model Tag {
+  id       String @id @default(cuid())
+  name     String @unique @db.VarChar(50)
+  colorHex String @map("color_hex") @db.VarChar(7)
+
+  transactions TransactionTag[]
+
+  @@map("tags")
+}
+
+model TransactionTag {
+  transactionId String @map("transaction_id")
+  tagId         String @map("tag_id")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+  @@map("transaction_tags")
 }
